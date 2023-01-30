@@ -1,11 +1,17 @@
+use atty::Stream;
 use clap::{ColorChoice, FromArgMatches, Subcommand};
 use color_eyre::Result;
-use indoc::indoc;
+use indoc::{formatdoc, indoc};
 use log::LevelFilter;
+use once_cell::sync::Lazy;
+use owo_colors::Effect::Underline;
+use owo_colors::OwoColorize;
+use owo_colors::styles::UnderlineDisplay;
 
 use crate::cli::command::Command;
 use crate::config::Config;
 use crate::output::Output;
+use crate::output::OutputType::Stdout;
 
 mod activate;
 mod alias;
@@ -127,8 +133,7 @@ impl Cli {
                 .long_about(LONG_ABOUT)
                 .arg_required_else_help(true)
                 .subcommand_required(true)
-                .after_help(AFTER_HELP)
-                .color(ColorChoice::Never)
+                .after_help(AFTER_HELP.as_str())
                 .arg(args::log_level::LogLevel::arg()),
         )
     }
@@ -158,8 +163,8 @@ directory.
 It is inspired by asdf and uses asdf's plugin ecosystem under the hood: https://asdf-vm.com/
 "};
 
-const AFTER_HELP: &str = indoc! {"
-    Examples:
+static AFTER_HELP: Lazy<String> = Lazy::new(|| {formatdoc!{ "
+    {}
 
         rtx install nodejs@20.0.0       Install a specific version number
         rtx install nodejs@20.0         Install a fuzzy version number
@@ -171,7 +176,11 @@ const AFTER_HELP: &str = indoc! {"
         rtx global system               Use system node as default
 
         rtx x nodejs@20 -- node app.js  Run `node app.js` with PATH pointing to node-20.x
-"};
+", header("Examples:")  }});
+
+fn header(title: &str) -> String {
+    title.if_supports_color(Stream::Stdout, |s| s.fg::<Blue>().fd::<UnderlineDisplay>to_string()
+}
 
 #[cfg(test)]
 pub mod test {
