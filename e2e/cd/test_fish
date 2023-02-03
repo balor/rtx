@@ -1,6 +1,7 @@
 #!/usr/bin/env fish
 # shellcheck disable=SC1072,SC1065,SC1064,SC1073,SC2103
 
+set -gx PATH $ROOT/.bin $PATH # in fish this is necessary so it doe not use the system rtx
 #set -l fish_trace 1
 rtx install nodejs@18.0.0 nodejs@16.0.0; or exit
 
